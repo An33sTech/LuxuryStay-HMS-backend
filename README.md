@@ -4,7 +4,7 @@
 
    ```bash
    git clone https://github.com/An33sTech/LuxuryStay-HMS-backend.git
-   cd your-repo
+   cd LuxuryStay-HMS-backend
 2. Create a .env file based on the provided .env.example:
    ```bash
    cp .env.example .env
