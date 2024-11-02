@@ -10,7 +10,7 @@
    cp .env.example .env
 3. Update the .env file with your actual values:
    ```bash
-   DB_URI=mongodb://your_database_uri
+   MONGO_URI=mongodb://your_database_uri/LuxuryStayHMS
    JWT_SECRET=your_secret
 4. Install the necessary dependencies:
    ```bash
