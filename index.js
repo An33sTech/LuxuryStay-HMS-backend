@@ -12,6 +12,7 @@ app.use(express.json());
 
 // Define Routes
 app.use('/users', require('./routes/userRoute'));
+app.use('/rooms', require('./routes/roomRoute'));
 
 // Start Server
 const PORT = process.env.PORT || 5000;
