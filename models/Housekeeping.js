@@ -10,4 +10,4 @@ const HousekeepingSchema = new mongoose.Schema({
 });
 
 const Housekeeping = mongoose.model("Housekeeping", HousekeepingSchema);
- module.exports = Housekeeping;
+module.exports = Housekeeping;
