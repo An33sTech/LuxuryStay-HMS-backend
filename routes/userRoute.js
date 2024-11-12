@@ -4,8 +4,7 @@ const jwt = require('jsonwebtoken');
 const User = require('../models/User');
 const router = express.Router();
 const { body, validationResult } = require("express-validator");
-// SECRET_KEY for JWT
-const SECRET_KEY = "your_secret";
+
 
 // REGISTER a new user
 router.post('/register', async (req, res) => {
