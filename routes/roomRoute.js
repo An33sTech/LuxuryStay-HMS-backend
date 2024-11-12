@@ -1,4 +1,3 @@
-// routes/roomRoutes.js
 const express = require('express');
 const Room = require('../models/Room');
 const router = express.Router();
