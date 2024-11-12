@@ -2,9 +2,19 @@ const express = require('express');
 const Housekeeping = require('../models/Housekeeping');
 const router = express.Router();
 
-// Create a new housekeeping task
+const mongoose = require('mongoose');
+// create housekeeping task
 router.post('/', async (req, res) => {
     try {
+        // Convert room and assignedTo to ObjectId if they are strings
+        if (typeof req.body.room === 'string') {
+            req.body.room = new mongoose.Types.ObjectId(req.body.room);
+        }
+
+        if (req.body.assignedTo && typeof req.body.assignedTo === 'string') {
+            req.body.assignedTo = new mongoose.Types.ObjectId(req.body.assignedTo);
+        }
+
         const newTask = new Housekeeping(req.body);
         await newTask.save();
         res.status(201).json(newTask);
@@ -12,6 +22,8 @@ router.post('/', async (req, res) => {
         res.status(500).json({ error: error.message });
     }
 });
+
+
 
 // Get all housekeeping tasks
 router.get('/', async (req, res) => {
