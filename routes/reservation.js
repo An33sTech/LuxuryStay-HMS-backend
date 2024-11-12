@@ -4,23 +4,8 @@ const mongoose = require('mongoose');
 const jwt = require('jsonwebtoken');
 const dotenv = require('dotenv');
 dotenv.config();
+const verifyToken = require("../middleware/auth")
 
-
-// Middleware to check if the user is authenticated
-const verifyToken = (req, res, next) => {
-  const token = req.headers['authorization'];
-  if (!token) {
-    return res.status(403).send('Access denied');
-  }
-
-  jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-    if (err) {
-      return res.status(401).send('Invalid token');
-    }
-    req.user = user;
-    next();
-  });
-};
 
 // Route to reserve a room
 router.post('/reserve-room', verifyToken, async (req, res) => {
