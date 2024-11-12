@@ -5,9 +5,22 @@ const router = express.Router();
 // Create a new billing record
 router.post('/', async (req, res) => {
     try {
-        const newBilling = new Billing(req.body);
+        const { reservation, guest, charges, paymentMethod, paymentReference } = req.body;
+
+        // Calculate total from charges
+        const total = charges.reduce((sum, charge) => sum + charge.amount, 0);
+
+        const newBilling = new Billing({
+            reservation,
+            guest,
+            charges,
+            total,
+            paymentMethod,
+            paymentReference
+        });
+
         await newBilling.save();
-        res.status(201).json(newBilling);
+        res.status(201).json({ message: 'Billing record created successfully', billing: newBilling });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
@@ -38,18 +51,25 @@ router.get('/:id', async (req, res) => {
     }
 });
 
-// Update a billing record (e.g., mark as paid)
+// Update a billing record (e.g., mark as paid, add charges)
 router.put('/:id', async (req, res) => {
     try {
-        const updatedBilling = await Billing.findByIdAndUpdate(
-            req.params.id,
-            req.body,
-            { new: true }
-        ).populate('reservation').populate('guest');
-        
+        const { charges, status, paymentMethod, paymentReference, paidAt } = req.body;
+
+        const updatedData = { status, paymentMethod, paymentReference, paidAt };
+
+        if (charges) {
+            updatedData.charges = charges;
+            updatedData.total = charges.reduce((sum, charge) => sum + charge.amount, 0);
+        }
+
+        const updatedBilling = await Billing.findByIdAndUpdate(req.params.id, updatedData, { new: true })
+            .populate('reservation')
+            .populate('guest');
+
         if (!updatedBilling) return res.status(404).json({ message: 'Billing record not found' });
-        
-        res.status(200).json(updatedBilling);
+
+        res.status(200).json({ message: 'Billing record updated successfully', billing: updatedBilling });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
