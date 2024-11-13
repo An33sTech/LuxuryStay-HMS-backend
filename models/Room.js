@@ -5,10 +5,10 @@ const RoomSchema = new mongoose.Schema({
     type: { type: String, enum: ['suite', 'single', 'double'], required: true },
     status: { type: String, enum: ['available', 'occupied', 'cleaning', 'maintenance'], default: 'available' },
     price: { type: Number, required: true },
-    features: [{ type: String }],  // e.g., ["sea view", "balcony"]
+    features: [{ type: String }],
     availability: { 
-        from: { type: Date },  // Start date of availability
-        to: { type: Date }     // End date of availability
+        from: { type: Date },
+        to: { type: Date }
     },
     lastCleaned: { type: Date },
     createdAt: { type: Date, default: Date.now },

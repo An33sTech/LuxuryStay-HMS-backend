@@ -1,33 +1,37 @@
 const express = require('express');
 const router = express.Router();
-const mongoose = require('mongoose');
-const jwt = require('jsonwebtoken');
-const dotenv = require('dotenv');
-dotenv.config();
+const Room = require('../models/Room');
+const Reservation = require('../models/Reservation');
+const User = require('../models/User');
 const verifyToken = require("../middleware/auth")
 
+router.get('/', async (req, res) => {
+  try {
+      const reservations = await Reservation.find();
+      res.status(200).json(reservations);
+  } catch (error) {
+      res.status(500).json({ error: error.message });
+  }
+});
 
 // Route to reserve a room
 router.post('/reserve-room', verifyToken, async (req, res) => {
-  const { roomId, guestId, checkInDate, checkOutDate, services, totalAmount } = req.body;
-
+  const { guest, room, checkIn, checkOut, services, totalAmount } = req.body;
+  
   try {
-    // Parse check-in and check-out dates to Date objects
-    const checkIn = new Date(checkInDate);
-    const checkOut = new Date(checkOutDate);
+    const checkInDate = new Date(checkIn);
+    const checkOutDate = new Date(checkOut);
 
-    // Find the room
-    const room = await Room.findById(roomId);
-
-    if (!room || room.status !== 'available') {
+    const roomSingle = await Room.findById(room);
+    
+    if (!roomSingle || roomSingle.status !== 'available') {
       return res.status(400).json({ message: 'Room is not available' });
     }
 
-    // Check if the room is already reserved for the requested dates
     const overlappingReservations = await Reservation.find({
-      room: roomId,
+      room: room,
       $or: [
-        { checkIn: { $lt: checkOut }, checkOut: { $gt: checkIn } } // Check for date overlap
+        { checkIn: { $lt: checkOutDate }, checkOut: { $gt: checkInDate } }
       ]
     });
 
@@ -35,51 +39,43 @@ router.post('/reserve-room', verifyToken, async (req, res) => {
       return res.status(400).json({ message: 'Room is already reserved for the selected dates' });
     }
 
-    // Ensure the guest (User) exists
-    const guest = await User.findById(guestId);
-    if (!guest) {
+    const guestSingle = await User.findById(guest);
+    if (!guestSingle) {
       return res.status(400).json({ message: 'Guest not found' });
     }
 
-    // Create the reservation
     const newReservation = new Reservation({
-      guest: guestId,
-      room: roomId,
+      guest: guest,
+      room: room,
       reservationDate: new Date(),
-      checkIn: checkIn,
-      checkOut: checkOut,
-      services: services,  // Include services requested by the guest
-      totalAmount: totalAmount,  // Total bill for the stay
-    });
-
-    // Save the reservation
-    await newReservation.save();
-
-    // Update room status to "reserved"
-    room.status = 'reserved';
-    await room.save();
-
-    // Optionally create a billing record for the reservation
-    const newInvoice = new Billing({
-      reservation: newReservation._id,
-      totalAmount: totalAmount,
+      checkIn: checkInDate,
+      checkOut: checkOutDate,
       services: services,
-      status: 'unpaid', // Invoice status can be 'unpaid' or 'paid'
+      totalAmount: totalAmount, 
     });
-    await newInvoice.save();
 
-    // Link invoice to the reservation
-    newReservation.invoice = newInvoice._id;
     await newReservation.save();
+
+    roomSingle.status = 'occupied';
+    await roomSingle.save();
 
     res.status(201).json({
       message: 'Room reserved successfully',
-      reservation: newReservation,
-      invoice: newInvoice,
+      reservation: newReservation
     });
   } catch (error) {
     console.error(error);
     res.status(500).json({ message: 'Error reserving the room' });
+  }
+});
+
+router.delete('/delete/:id', async (req, res) => {
+  try {
+      const deletedReservation = await Reservation.findByIdAndDelete(req.params.id);
+      if (!deletedReservation) return res.status(404).json({ message: 'Reservation not found' });
+      res.status(200).json({ message: 'Reservation deleted successfully' });
+  } catch (error) {
+      res.status(500).json({ error: error.message });
   }
 });
 

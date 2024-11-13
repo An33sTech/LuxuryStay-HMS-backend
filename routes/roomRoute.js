@@ -58,7 +58,7 @@ router.get('/available', async (req, res) => {
 // GET a single room by ID
 router.get('/:id', async (req, res) => {
     try {
-        const room = await Room.findById(req.params.id);
+        const room = await Room.findById(req.params.id);    
         if (!room) return res.status(404).json({ message: 'Room not found' });
         res.status(200).json(room);
     } catch (error) {

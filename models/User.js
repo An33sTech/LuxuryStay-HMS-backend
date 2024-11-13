@@ -10,7 +10,7 @@ const UserSchema = new mongoose.Schema({
             email: { type: String, required: true, unique: true },
             phone: { type: String, required: true }
         },
-        preferences: { type: Map, of: String } // guest preferences
+        preferences: { type: Map, of: String }
     },
     status: { type: String, enum: ['active', 'inactive'], default: 'active' },
     createdAt: { type: Date, default: Date.now },

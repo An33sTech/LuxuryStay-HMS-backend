@@ -1,7 +1,5 @@
 const jwt = require("jsonwebtoken")
 
-
-
 const authMiddleware = (req, res, next) => {
     const token = req.header("token");
 
@@ -10,7 +8,7 @@ const authMiddleware = (req, res, next) => {
     }
 
     try {
-        const decodedToken = jwt.verify(token,process.env.MONGO_URI);
+        const decodedToken = jwt.verify(token,process.env.JWT_SECRET);
         req.userId = decodedToken.id;
         next();
     } catch (error) {

@@ -48,9 +48,9 @@ router.post('/register', async (req, res) => {
 router.post(
     "/login",
     [
-      body("email").optional(),          // Email is optional since username can be used
-      body("username").optional(),       // Username is optional since email can be used
-      body("password").exists(),         // Password is required
+      body("email").optional(),
+      body("username").optional(),
+      body("password").exists(),
     ],
     async (req, res) => {
       // Validate request
@@ -59,10 +59,9 @@ router.post(
         return res.status(400).json({ error: errors.array() });
       }
   
-      // Extract login credentials
-      const { email, username, password } = req.body;
-  
       try {
+        const { email, username, password } = req.body;
+        
         // Find user by either email or username
         const userExist = await User.findOne({
           $or: [{ email }, { username }]

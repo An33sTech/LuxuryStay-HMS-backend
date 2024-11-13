@@ -5,18 +5,15 @@ const router = express.Router();
 // Create a new billing record
 router.post('/', async (req, res) => {
     try {
-        const { reservation, guest, charges, paymentMethod, paymentReference } = req.body;
+        const { reservation, guest, charges } = req.body;
 
-        // Calculate total from charges
         const total = charges.reduce((sum, charge) => sum + charge.amount, 0);
 
         const newBilling = new Billing({
             reservation,
             guest,
             charges,
-            total,
-            paymentMethod,
-            paymentReference
+            total
         });
 
         await newBilling.save();
@@ -54,18 +51,9 @@ router.get('/:id', async (req, res) => {
 // Update a billing record (e.g., mark as paid, add charges)
 router.put('/:id', async (req, res) => {
     try {
-        const { charges, status, paymentMethod, paymentReference, paidAt } = req.body;
-
-        const updatedData = { status, paymentMethod, paymentReference, paidAt };
-
-        if (charges) {
-            updatedData.charges = charges;
-            updatedData.total = charges.reduce((sum, charge) => sum + charge.amount, 0);
-        }
-
-        const updatedBilling = await Billing.findByIdAndUpdate(req.params.id, updatedData, { new: true })
-            .populate('reservation')
-            .populate('guest');
+        const {status, paidAt } = req.body;
+        const paidAtDate = new Date(paidAt);
+        const updatedBilling = await Billing.findByIdAndUpdate(req.params.id, {status, paidAtDate }, { new: true });
 
         if (!updatedBilling) return res.status(404).json({ message: 'Billing record not found' });
 

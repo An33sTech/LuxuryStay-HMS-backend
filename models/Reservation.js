@@ -8,11 +8,10 @@ const ReservationSchema = new mongoose.Schema({
     checkOut: { type: Date, required: true },
     status: { type: String, enum: ['confirmed', 'checked-in', 'checked-out', 'cancelled'], default: 'confirmed' },
     totalAmount: { type: Number, required: true },
-    services: [{
-        serviceName: { type: String },  // e.g., "room service", "laundry"
+    services: {
+        serviceName: { type: String },
         amount: { type: Number }
-    }],
-    invoice: { type: mongoose.Schema.Types.ObjectId, ref: 'Billing' } // Link to invoice if necessary
+    },
 });
 
 const Reservation = mongoose.model('Reservation', ReservationSchema);

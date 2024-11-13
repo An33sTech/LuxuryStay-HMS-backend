@@ -1,8 +1,8 @@
 const mongoose = require('mongoose');
 
 const BillingSchema = new mongoose.Schema({
-    reservation: { type: mongoose.Schema.Types.ObjectId, ref: 'Reservation', required: true },  // Reference to Reservation
-    guest: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },  // Guest ID reference
+    reservation: { type: mongoose.Schema.Types.ObjectId, ref: 'Reservation', required: true },
+    guest: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     charges: [{
         description: { type: String },
         amount: { type: Number, required: true }
