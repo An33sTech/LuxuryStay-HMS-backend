@@ -1,6 +1,7 @@
 const express = require('express');
 const connectDB = require('./config/db');
 const cors = require("cors");
+const path = require('path');
 require('dotenv').config();
 
 const app = express();
@@ -11,6 +12,7 @@ connectDB();
 // Middleware
 app.use(express.json());
 app.use(cors());
+app.use('/uploads', express.static(path.join(__dirname, 'uploads')));
 
 // Define Routes
 app.use('/users', require('./routes/userRoute'));
@@ -21,6 +23,7 @@ app.use('/billing', require('./routes/billing'));
 app.use('/feedback', require('./routes/feedback'));
 app.use('/notifications', require('./routes/notification'));
 app.use('/maintenance', require('./routes/maintenance'));
+app.use('/api', require('./routes/chartsRoute'));
 
 // Start Server
 const PORT = process.env.PORT || 5000;
