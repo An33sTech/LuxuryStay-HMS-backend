@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
 // UPDATE a room by ID
 router.put('/update/:id', anyUpload, async (req, res) => {
     try {
-        const { roomName, roomType, roomStatus, roomPrice, roomShortDesc, roomComments, persons, lastCleaned } = req.body;
+        const { roomName, roomType, roomStatus, roomPrice, roomShortDesc, roomComments, persons, lastCleaned, availability } = req.body;
         let features = [];
         if (typeof req.body.features === 'string') {
             features = JSON.parse(req.body.features);
@@ -112,7 +112,10 @@ router.put('/update/:id', anyUpload, async (req, res) => {
         room.features = features.length ? features : room.features;
         room.comments = roomComments || room.comments;
         room.lastCleaned = lastCleaned || room.lastCleaned
-
+        if (availability) {
+            room.availability.from = availability.from === "" ? null : new Date(availability.from);
+            room.availability.to = availability.to === "" ? null : new Date(availability.to);
+        }
         const updatedRoom = await room.save();
         res.status(200).json(updatedRoom);
     } catch (error) {
