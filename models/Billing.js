@@ -5,7 +5,7 @@ const BillingSchema = new mongoose.Schema({
     guest: { type: mongoose.Schema.Types.ObjectId, ref: 'User', required: true },
     charges: [{
         description: { type: String },
-        amount: { type: Number, required: true }
+        amount: { type: Number }
     }],
     total: { type: Number, required: true },
     status: { type: String, enum: ['paid', 'unpaid'], default: 'unpaid' },

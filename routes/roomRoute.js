@@ -81,7 +81,7 @@ router.get('/', async (req, res) => {
 // UPDATE a room by ID
 router.put('/update/:id', anyUpload, async (req, res) => {
     try {
-        const { roomName, roomType, roomStatus, roomPrice, roomShortDesc, roomComments, persons, lastCleaned, availability } = req.body;
+        const { roomName, roomType, roomStatus, roomPrice, roomShortDesc, roomComments, persons, lastCleaned } = req.body;
         let features = [];
         if (typeof req.body.features === 'string') {
             features = JSON.parse(req.body.features);
@@ -112,10 +112,7 @@ router.put('/update/:id', anyUpload, async (req, res) => {
         room.features = features.length ? features : room.features;
         room.comments = roomComments || room.comments;
         room.lastCleaned = lastCleaned || room.lastCleaned
-        if (availability) {
-            room.availability.from = availability.from === "" ? null : new Date(availability.from);
-            room.availability.to = availability.to === "" ? null : new Date(availability.to);
-        }
+
         const updatedRoom = await room.save();
         res.status(200).json(updatedRoom);
     } catch (error) {
@@ -137,25 +134,35 @@ router.delete('/delete/:id', async (req, res) => {
 // GET available rooms
 router.get('/available', async (req, res) => {
     try {
-        const { start, end } = req.query;
-        if (!start || !end) {
-            return res.status(400).json({ message: "Check-in and check-out dates are required." });
+        const { start, end, guests } = req.query;
+
+        if (!start || !end || !guests) {
+            return res.status(400).json({ message: "Check-in and check-out dates and guests are required." });
         }
-        const startDate = new Date(start);
-        const endDate = new Date(end);
-        const bookedRoomIds = await Reservation.find({
+
+        const checkInDate = new Date(start);
+        const checkOutDate = new Date(end);
+        
+        if(checkInDate >= checkOutDate){
+            return res.status(400).json({ message: "Check-out date must be after the check-in date." });
+        }
+
+        const reservedRooms = await Reservation.find({
             $or: [
-                {
-                    checkIn: { $lt: endDate },
-                    checkOut: { $gt: startDate },
-                },
+                { checkIn: { $lt: checkOutDate }, checkOut: { $gt: checkInDate } }
             ],
-        }).distinct('roomId');
+        }).select('room');
+
+        const reservedRoomIds = reservedRooms.map((reservation) => reservation.room);
         const availableRooms = await Room.find({
-            _id: { $nin: bookedRoomIds },
+            _id: { $nin: reservedRoomIds },
+            status: 'available',
+            persons: guests
         });
+
         res.status(200).json(availableRooms);
     } catch (error) {
+        console.error('Error fetching available rooms:', error);
         res.status(500).json({ error: error.message });
     }
 });

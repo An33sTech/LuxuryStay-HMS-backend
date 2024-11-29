@@ -15,10 +15,6 @@ const RoomSchema = new mongoose.Schema({
             text: { type: String, required: true }
         }
     ],
-    availability: {
-        from: { type: Date },
-        to: { type: Date }
-    },
     lastCleaned: { type: Date },
     comments: { type: String },
     createdAt: { type: Date, default: Date.now },
