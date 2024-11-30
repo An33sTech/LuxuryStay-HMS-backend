@@ -2,6 +2,7 @@ const express = require('express');
 const Reservation = require('../models/Reservation');
 const Room = require('../models/Room');
 const RoomPriceHistory = require('../models/RoomPriceHistory');
+const Feedback = require('../models/Feedback');
 const router = express.Router();
 
 async function getOccupancyRate(startDate, endDate) {

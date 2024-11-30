@@ -3,6 +3,7 @@ const Room = require('../models/Room');
 const Reservation = require('../models/Reservation');
 const router = express.Router();
 const { anyUpload } = require("../middleware/upload");
+const RoomPriceHistory = require('../models/RoomPriceHistory');
 
 const generateRoomNumber = async () => {
     let roomNumber;
@@ -114,6 +115,14 @@ router.put('/update/:id', anyUpload, async (req, res) => {
         room.lastCleaned = lastCleaned || room.lastCleaned
 
         const updatedRoom = await room.save();
+
+        const roomPriceHistory = new RoomPriceHistory({
+            room: updatedRoom._id,
+            price: updatedRoom.price,
+        });
+        await roomPriceHistory.save();
+        
+
         res.status(200).json(updatedRoom);
     } catch (error) {
         res.status(500).json({ error: error.message });
@@ -142,8 +151,8 @@ router.get('/available', async (req, res) => {
 
         const checkInDate = new Date(start);
         const checkOutDate = new Date(end);
-        
-        if(checkInDate >= checkOutDate){
+
+        if (checkInDate >= checkOutDate) {
             return res.status(400).json({ message: "Check-out date must be after the check-in date." });
         }
 
