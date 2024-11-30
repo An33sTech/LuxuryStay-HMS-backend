@@ -129,16 +129,30 @@ router.get("/:id", async (req, res) => {
 });
 
 // UPDATE a user's information by ID
-router.put("/update/:id", async (req, res) => {
+router.put("/update/:id", singleUpload, async (req, res) => {
     try {
-        const updatedUser = await User.findByIdAndUpdate(req.params.id, req.body, {
-            new: true,
-        });
-        if (!updatedUser)
+        const { profile } = req.body;
+        const imagePath = req.file ? `/uploads/${req.file.filename}` : null;
+
+        const updateData = {
+            "profile.name": profile.name,
+            "profile.contact.phone": profile.contact?.phone,
+        };
+
+        if (imagePath) {
+            updateData["profile.image"] = imagePath;
+        }
+
+        const updatedUser = await User.findByIdAndUpdate(
+            req.params.id,
+            { $set: updateData },
+            { new: true }
+        );
+
+        if (!updatedUser) {
             return res.status(404).json({ message: "User not found" });
-        res
-            .status(200)
-            .json({ message: "User updated successfully", user: updatedUser });
+        }
+        res.status(200).json({ message: "User updated successfully", user: updatedUser });
     } catch (error) {
         res.status(500).json({ error: error.message });
     }
