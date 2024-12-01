@@ -17,7 +17,6 @@ router.get('/', async (req, res) => {
   }
 });
 
-// Route to reserve a room
 router.post('/reserve-room', async (req, res) => {
   const { guest, room, checkIn, checkOut, totalAmount } = req.body;
 
@@ -115,7 +114,7 @@ router.post('/reserve-room', async (req, res) => {
               <table>
                 <tr>
                   <td><strong>Room:</strong></td>
-                  <td>${roomSingle.name || 'Room Name'}</td>
+                  <td>${roomSingle.roomName || 'Room Name'}</td>
                 </tr>
                 <tr>
                   <td><strong>Check-in Date:</strong></td>
@@ -169,7 +168,6 @@ router.post('/reserve-room', async (req, res) => {
   }
 });
 
-
 router.delete('/delete/:id', async (req, res) => {
   try {
     const deletedReservation = await Reservation.findByIdAndDelete(req.params.id);
@@ -198,6 +196,19 @@ router.get('/:id', async (req, res) => {
     res.status(200).json({reservation: reservation, billing: billing});
   } catch (error) {
     res.status(500).json({ message: 'Error fetching the reservation' });
+  }
+});
+
+router.put('/update-status/:id', async (req, res) => {
+  try{
+    const { status } = req.body;
+
+    const updatedReservation = await Reservation.findByIdAndUpdate(req.params.id, { status }, { new: true });
+    if (!updatedReservation) return res.status(404).json({ message: 'Reservation not found' });
+    
+    res.status(200).json(updatedReservation);
+  } catch(error){
+    res.status(500).json({ error: error.message });
   }
 });
 
